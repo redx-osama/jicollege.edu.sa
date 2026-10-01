@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head>
+  <meta charset="UTF-8">
+  <title>تسجيل الدخول - كلية جدة العالمية الأهلية</title>
+  <style>
+    body {
+      font-family: "Tahoma", sans-serif;
+      background: linear-gradient(to bottom, #e9f1f9, #d0e1f9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .login-box {
+      background: #fff;
+      width: 350px;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+
+    .login-box h2 {
+      font-size: 18px;
+      margin-bottom: 5px;
+      color: #333;
+    }
+
+    .login-box p {
+      font-size: 14px;
+      margin-bottom: 20px;
+      color: #666;
+    }
+
+    .login-box img {
+      width: 60px;
+      margin-bottom: 10px;
+    }
+
+    .login-box input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+      text-align: right;
+    }
+
+    .login-box button {
+      width: 100%;
+      padding: 10px;
+      background: #3498db;
+      border: none;
+      color: #fff;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .login-box button:hover {
+      background: #2980b9;
+    }
+
+    .error {
+      color: red;
+      font-size: 13px;
+      margin-top: 10px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+   <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSICNyvoyEsdCYP19ZWL0tOlwqYLQTxi6WeScKh3k91YQ&amp;s" alt="شعار كلية جدة العالمية الاهلية" class="logo-img" style="height:44px;width:auto;display:block;object-fit:contain">
+    <h2>تسجيل الدخول لنظام بيانات الطلاب</h2>
+    <p></p>
+
+    <form onsubmit="return loginUser()">
+      <input type="text" id="username" placeholder="رقم القيد" required="">
+      <input type="password" id="password" placeholder="الباسورد" required="">
+      <button type="submit">دخول</button>
+      <div class="error" id="error-msg">❌ اسم المستخدم أو كلمة المرور غير صحيحة</div>
+    </form>
+  </div>
+
+  <script>
+    function loginUser() {
+      let user = document.getElementById("username").value.trim();
+      let pass = document.getElementById("password").value.trim();
+      let errorMsg = document.getElementById("error-msg");
+
+      // بيانات الدخول الصحيحة
+      let correctUser = "636020113";
+      let correctPass = "ma#@67";
+
+      if(user === correctUser && pass === correctPass){
+        window.location.href = "agriculture.html"; 
+        return false;
+      } else {
+        errorMsg.style.display = "block";
+        return false;
+      }
+    }
+  </script>
+
+
+</body></html>

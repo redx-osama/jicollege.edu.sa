@@ -1,0 +1,895 @@
+<html lang="ar" dir="rtl"><head><script src="protection.js"></script>
+</head><body>
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام التحقق الرقمي - كلية جدة العالمية الاهلية </title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #1a3a6e;
+            --primary-light: #2a5a9e;
+            --accent: #c9a227;
+            --success: #4CAF50;
+            --bg-light: #f5f7fa;
+            --text-dark: #1a1a2e;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+        }
+        body {
+            font-family: 'Segoe UI', 'Tahoma', sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* ===== PARTICLES ===== */
+        .particles-bg {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            background: linear-gradient(135deg, #1a3a6e 0%, #0d1f3d 50%, #1a3a6e 100%);
+            overflow: hidden;
+        }
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.4;
+            animation: floatUp linear infinite;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 0.4; }
+            90% { opacity: 0.4; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+
+        /* ===== LOADING ===== */
+        .loading-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: var(--primary);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 20px;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        .loading-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+        .loader-ring {
+            width: 60px; height: 60px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: loaderSpin 1s linear infinite;
+        }
+        @keyframes loaderSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loading-text {
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        /* ===== LOGIN ===== */
+        .login-page {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        .login-page.hidden {
+            opacity: 0;
+            transform: scale(1.1);
+            pointer-events: none;
+        }
+        .login-card {
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(25px) saturate(1.2);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 24px;
+            padding: 45px 35px;
+            width: 90%;
+            max-width: 420px;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            animation: cardFloat 6s ease-in-out infinite;
+        }
+        @keyframes cardFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .university-logo {
+            width: 90px;
+            height: 110px;
+            margin: 0 auto 20px;
+            animation: logoSpin 8s ease-in-out infinite;
+        }
+        @keyframes logoSpin {
+            0%, 100% { transform: rotateY(0deg); }
+            50% { transform: rotateY(10deg); }
+        }
+        .login-title {
+            color: white;
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .input-group {
+            margin-bottom: 18px;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid rgba(255,255,255,0.15);
+            border-radius: 14px;
+            background: rgba(255,255,255,0.95);
+            font-family: inherit;
+            font-size: 1rem;
+            text-align: center;
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+            outline: none;
+        }
+        .input-group input::placeholder {
+            color: #999;
+            font-weight: 500;
+        }
+        .input-group input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(201,162,39,0.2), 0 8px 25px rgba(0,0,0,0.1);
+        }
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            margin-top: 10px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-family: inherit;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(37,99,235,0.4);
+        }
+        .login-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 35px rgba(37,99,235,0.5);
+        }
+
+        /* ===== DASHBOARD ===== */
+        .dashboard-page {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 5;
+            overflow-y: auto;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.8s ease 0.3s;
+            background: var(--bg-light);
+        }
+        .dashboard-page.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .dash-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(26,58,110,0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .dash-header h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .logout-btn {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.25);
+        }
+        .profile-hero {
+            background: white;
+            padding: 40px 25px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .profile-hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 120px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 0 0 50% 50%;
+            transform: scaleX(1.5);
+        }
+        .profile-photo-container {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 20px;
+            z-index: 2;
+        }
+        .profile-photo {
+            width: 130px; height: 130px;
+            border-radius: 50%;
+            border: 5px solid white;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            background: linear-gradient(135deg, #e0e0e0, #f5f5f5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: var(--primary);
+            overflow: hidden;
+        }
+        .profile-photo img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+        }
+        .profile-photo-ring {
+            position: absolute;
+            top: -8px; left: -8px;
+            right: -8px; bottom: -8px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: var(--accent);
+            border-right-color: var(--accent);
+            animation: ringRotate 3s linear infinite;
+        }
+        @keyframes ringRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .profile-name {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+        .profile-subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--success), #45a049);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 15px rgba(76,175,80,0.3);
+            animation: badgePulse 2s ease-in-out infinite;
+        }
+        @keyframes badgePulse {
+            0%, 100% { box-shadow: 0 4px 15px rgba(76,175,80,0.3); }
+            50% { box-shadow: 0 4px 25px rgba(76,175,80,0.5); }
+        }
+        .dash-content {
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .section-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+        .section-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border);
+        }
+        .section-icon {
+            width: 45px; height: 45px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 12px rgba(26,58,110,0.2);
+        }
+        .section-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .info-value {
+            color: var(--text-dark);
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-align: left;
+        }
+        .info-value.highlight { color: var(--primary); font-size: 1.1rem; }
+        .info-value.success { color: var(--success); }
+        .info-value.code {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-family: monospace;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 12px rgba(26,58,110,0.2);
+        }
+        .view-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--success), #45a049);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+            text-decoration: none;
+        }
+        .view-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(76,175,80,0.4);
+        }
+        .dash-footer {
+            text-align: center;
+            padding: 30px 20px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* ===== CERTIFICATE PAGE ===== */
+        .certificate-page {
+            background: #e8f0f8;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .certificate-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #e8f0f8;
+            padding: 30px;
+        }
+        .cert-header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .cert-header h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #1a3a6e;
+            margin-bottom: 5px;
+        }
+        .cert-header h2 {
+            font-size: 1.2rem;
+            color: #c9a227;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        .cert-divider {
+            height: 2px;
+            background: #1a3a6e;
+            margin: 0 0 30px 0;
+        }
+        .cert-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 25px;
+            padding: 0 20px;
+        }
+        .cert-col {
+            flex: 1;
+            text-align: center;
+            padding: 0 15px;
+        }
+        .cert-col-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        .cert-col-value {
+            font-size: 1.1rem;
+            color: #1a1a2e;
+            font-weight: 700;
+            line-height: 1.4;
+        }
+        .cert-col-value.highlight {
+            color: #4CAF50;
+            font-weight: 800;
+        }
+        .cert-footer-bar {
+            background: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 25px;
+            margin: 40px -30px -30px -30px;
+        }
+        .cert-footer-bar h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        .cert-footer-bar p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        .cert-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #1a3a6e;
+            margin: 0 auto 20px;
+            display: block;
+        }
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #1a3a6e;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .print-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        @media (max-width: 480px) {
+            .login-card { padding: 35px 25px; }
+            .login-title { font-size: 1.3rem; }
+            .profile-name { font-size: 1.2rem; }
+            .dash-content { padding: 15px; }
+            .section-card { padding: 20px; }
+            .dash-header h2 { font-size: 0.9rem; }
+            .cert-row { flex-direction: column; gap: 15px; }
+            .cert-col { width: 100%; }
+        }
+    </style>
+<base target="_blank">
+
+
+
+    <!-- Loading -->
+    <div class="loading-overlay hidden" id="loadingOverlay">
+        <div class="loader-ring"></div>
+        <div class="loading-text">جاري التحميل...</div>
+    </div>
+
+    <!-- Particles -->
+    <div class="particles-bg" id="particlesBg"><div class="particle" style="width: 2.71181px; height: 2.71181px; left: 65.7191%; background: rgba(201, 162, 39, 0.518); animation-duration: 18.0304s; animation-delay: 3.8033s;"></div><div class="particle" style="width: 5.64458px; height: 5.64458px; left: 72.025%; background: rgba(201, 162, 39, 0.408); animation-duration: 15.8782s; animation-delay: 0.450627s;"></div><div class="particle" style="width: 7.89219px; height: 7.89219px; left: 8.83009%; background: rgba(201, 162, 39, 0.384); animation-duration: 16.7815s; animation-delay: 9.82s;"></div><div class="particle" style="width: 5.95821px; height: 5.95821px; left: 61.5481%; background: rgba(201, 162, 39, 0.42); animation-duration: 21.5439s; animation-delay: 1.94777s;"></div><div class="particle" style="width: 2.26365px; height: 2.26365px; left: 46.0783%; background: rgba(201, 162, 39, 0.28); animation-duration: 16.6001s; animation-delay: 4.94062s;"></div><div class="particle" style="width: 4.6155px; height: 4.6155px; left: 75.909%; background: rgba(201, 162, 39, 0.373); animation-duration: 12.1029s; animation-delay: 8.7533s;"></div><div class="particle" style="width: 2.11923px; height: 2.11923px; left: 15.258%; background: rgba(201, 162, 39, 0.66); animation-duration: 24.4947s; animation-delay: 7.78528s;"></div><div class="particle" style="width: 4.40125px; height: 4.40125px; left: 47.5577%; background: rgba(201, 162, 39, 0.486); animation-duration: 11.977s; animation-delay: 6.22893s;"></div><div class="particle" style="width: 4.13872px; height: 4.13872px; left: 12.926%; background: rgba(201, 162, 39, 0.286); animation-duration: 24.9779s; animation-delay: 5.09813s;"></div><div class="particle" style="width: 3.79523px; height: 3.79523px; left: 52.993%; background: rgba(201, 162, 39, 0.29); animation-duration: 12.4246s; animation-delay: 4.15449s;"></div><div class="particle" style="width: 4.68835px; height: 4.68835px; left: 29.9716%; background: rgba(201, 162, 39, 0.21); animation-duration: 11.4209s; animation-delay: 3.39253s;"></div><div class="particle" style="width: 7.22213px; height: 7.22213px; left: 51.7901%; background: rgba(201, 162, 39, 0.6); animation-duration: 17.5283s; animation-delay: 2.34642s;"></div><div class="particle" style="width: 6.84355px; height: 6.84355px; left: 56.9856%; background: rgba(201, 162, 39, 0.635); animation-duration: 23.5798s; animation-delay: 8.29249s;"></div><div class="particle" style="width: 4.58168px; height: 4.58168px; left: 38.0863%; background: rgba(201, 162, 39, 0.635); animation-duration: 10.5388s; animation-delay: 4.78646s;"></div><div class="particle" style="width: 7.99053px; height: 7.99053px; left: 15.541%; background: rgba(201, 162, 39, 0.663); animation-duration: 10.7673s; animation-delay: 3.12704s;"></div><div class="particle" style="width: 3.67545px; height: 3.67545px; left: 71.6083%; background: rgba(201, 162, 39, 0.64); animation-duration: 14.8439s; animation-delay: 1.13834s;"></div><div class="particle" style="width: 6.84423px; height: 6.84423px; left: 50.2406%; background: rgba(201, 162, 39, 0.584); animation-duration: 18.3338s; animation-delay: 8.57317s;"></div><div class="particle" style="width: 7.26379px; height: 7.26379px; left: 25.2761%; background: rgba(201, 162, 39, 0.443); animation-duration: 21.9392s; animation-delay: 9.81385s;"></div><div class="particle" style="width: 4.4929px; height: 4.4929px; left: 99.4978%; background: rgba(201, 162, 39, 0.38); animation-duration: 16.3021s; animation-delay: 8.0245s;"></div><div class="particle" style="width: 7.86092px; height: 7.86092px; left: 30.3087%; background: rgba(201, 162, 39, 0.58); animation-duration: 23.0087s; animation-delay: 0.778253s;"></div><div class="particle" style="width: 7.65572px; height: 7.65572px; left: 84.542%; background: rgba(201, 162, 39, 0.694); animation-duration: 22.5045s; animation-delay: 9.65052s;"></div><div class="particle" style="width: 3.4864px; height: 3.4864px; left: 39.1421%; background: rgba(201, 162, 39, 0.596); animation-duration: 10.0375s; animation-delay: 4.06417s;"></div><div class="particle" style="width: 5.64578px; height: 5.64578px; left: 61.2837%; background: rgba(201, 162, 39, 0.26); animation-duration: 19.1587s; animation-delay: 1.11825s;"></div><div class="particle" style="width: 3.20443px; height: 3.20443px; left: 3.15508%; background: rgba(201, 162, 39, 0.275); animation-duration: 19.0901s; animation-delay: 3.03999s;"></div><div class="particle" style="width: 6.30005px; height: 6.30005px; left: 25.5318%; background: rgba(201, 162, 39, 0.275); animation-duration: 23.7067s; animation-delay: 7.39431s;"></div><div class="particle" style="width: 5.27044px; height: 5.27044px; left: 43.7621%; background: rgba(201, 162, 39, 0.247); animation-duration: 12.9255s; animation-delay: 0.982084s;"></div><div class="particle" style="width: 2.12765px; height: 2.12765px; left: 41.9802%; background: rgba(201, 162, 39, 0.353); animation-duration: 23.1997s; animation-delay: 1.30208s;"></div><div class="particle" style="width: 2.34122px; height: 2.34122px; left: 90.7013%; background: rgba(201, 162, 39, 0.376); animation-duration: 24.7801s; animation-delay: 0.828809s;"></div><div class="particle" style="width: 3.97017px; height: 3.97017px; left: 2.23346%; background: rgba(201, 162, 39, 0.36); animation-duration: 18.0553s; animation-delay: 8.89449s;"></div><div class="particle" style="width: 5.48832px; height: 5.48832px; left: 23.9411%; background: rgba(201, 162, 39, 0.235); animation-duration: 16.6298s; animation-delay: 4.71256s;"></div><div class="particle" style="width: 2.66387px; height: 2.66387px; left: 12.5845%; background: rgba(201, 162, 39, 0.655); animation-duration: 23.6516s; animation-delay: 0.143446s;"></div><div class="particle" style="width: 6.45625px; height: 6.45625px; left: 31.5092%; background: rgba(201, 162, 39, 0.31); animation-duration: 13.0368s; animation-delay: 4.95722s;"></div><div class="particle" style="width: 5.03105px; height: 5.03105px; left: 42.1932%; background: rgba(201, 162, 39, 0.318); animation-duration: 16.487s; animation-delay: 5.36227s;"></div><div class="particle" style="width: 2.11377px; height: 2.11377px; left: 74.4005%; background: rgba(201, 162, 39, 0.6); animation-duration: 19.0952s; animation-delay: 2.05633s;"></div><div class="particle" style="width: 4.4514px; height: 4.4514px; left: 56.4568%; background: rgba(201, 162, 39, 0.647); animation-duration: 10.3834s; animation-delay: 7.10082s;"></div><div class="particle" style="width: 7.23473px; height: 7.23473px; left: 43.162%; background: rgba(201, 162, 39, 0.4); animation-duration: 19.5171s; animation-delay: 2.9301s;"></div><div class="particle" style="width: 5.9353px; height: 5.9353px; left: 55.0382%; background: rgba(201, 162, 39, 0.447); animation-duration: 14.206s; animation-delay: 4.14166s;"></div><div class="particle" style="width: 3.09984px; height: 3.09984px; left: 27.6257%; background: rgba(201, 162, 39, 0.616); animation-duration: 10.819s; animation-delay: 6.07555s;"></div><div class="particle" style="width: 2.02233px; height: 2.02233px; left: 75.6529%; background: rgba(201, 162, 39, 0.57); animation-duration: 10.8222s; animation-delay: 1.10865s;"></div><div class="particle" style="width: 7.77901px; height: 7.77901px; left: 54.6545%; background: rgba(201, 162, 39, 0.537); animation-duration: 17.2374s; animation-delay: 7.80338s;"></div><div class="particle" style="width: 6.79228px; height: 6.79228px; left: 79.8546%; background: rgba(201, 162, 39, 0.66); animation-duration: 14.2267s; animation-delay: 8.94469s;"></div><div class="particle" style="width: 6.33685px; height: 6.33685px; left: 35.3498%; background: rgba(201, 162, 39, 0.57); animation-duration: 14.8596s; animation-delay: 3.33069s;"></div><div class="particle" style="width: 2.40592px; height: 2.40592px; left: 57.1654%; background: rgba(201, 162, 39, 0.298); animation-duration: 22.4661s; animation-delay: 7.42958s;"></div><div class="particle" style="width: 3.25161px; height: 3.25161px; left: 23.1368%; background: rgba(201, 162, 39, 0.686); animation-duration: 18.4871s; animation-delay: 2.76074s;"></div><div class="particle" style="width: 5.43133px; height: 5.43133px; left: 21.749%; background: rgba(201, 162, 39, 0.235); animation-duration: 24.3738s; animation-delay: 0.859619s;"></div><div class="particle" style="width: 5.56423px; height: 5.56423px; left: 65.4876%; background: rgba(201, 162, 39, 0.482); animation-duration: 19.6752s; animation-delay: 1.96185s;"></div><div class="particle" style="width: 3.93107px; height: 3.93107px; left: 40.8177%; background: rgba(201, 162, 39, 0.216); animation-duration: 22.2068s; animation-delay: 2.14592s;"></div><div class="particle" style="width: 2.55842px; height: 2.55842px; left: 19.3931%; background: rgba(201, 162, 39, 0.365); animation-duration: 18.691s; animation-delay: 7.08076s;"></div><div class="particle" style="width: 4.26862px; height: 4.26862px; left: 96.2391%; background: rgba(201, 162, 39, 0.486); animation-duration: 20.6353s; animation-delay: 2.35529s;"></div><div class="particle" style="width: 5.4491px; height: 5.4491px; left: 57.755%; background: rgba(201, 162, 39, 0.333); animation-duration: 18.1126s; animation-delay: 3.31369s;"></div><div class="particle" style="width: 7.30813px; height: 7.30813px; left: 5.04853%; background: rgba(201, 162, 39, 0.204); animation-duration: 22.8796s; animation-delay: 8.37536s;"></div><div class="particle" style="width: 6.31966px; height: 6.31966px; left: 12.3172%; background: rgba(201, 162, 39, 0.482); animation-duration: 24.0209s; animation-delay: 5.77143s;"></div><div class="particle" style="width: 3.44063px; height: 3.44063px; left: 93.7435%; background: rgba(201, 162, 39, 0.675); animation-duration: 19.2616s; animation-delay: 6.15084s;"></div><div class="particle" style="width: 3.2191px; height: 3.2191px; left: 30.2279%; background: rgba(201, 162, 39, 0.41); animation-duration: 15.0095s; animation-delay: 2.20401s;"></div><div class="particle" style="width: 7.15433px; height: 7.15433px; left: 31.7478%; background: rgba(201, 162, 39, 0.392); animation-duration: 15.3202s; animation-delay: 6.56666s;"></div><div class="particle" style="width: 4.26822px; height: 4.26822px; left: 69.3914%; background: rgba(201, 162, 39, 0.475); animation-duration: 11.9377s; animation-delay: 8.96968s;"></div><div class="particle" style="width: 3.42046px; height: 3.42046px; left: 60.147%; background: rgba(201, 162, 39, 0.655); animation-duration: 10.1784s; animation-delay: 0.587543s;"></div><div class="particle" style="width: 7.98619px; height: 7.98619px; left: 23.3884%; background: rgba(201, 162, 39, 0.345); animation-duration: 24.1389s; animation-delay: 5.31677s;"></div><div class="particle" style="width: 3.51908px; height: 3.51908px; left: 42.6202%; background: rgba(201, 162, 39, 0.494); animation-duration: 12.3467s; animation-delay: 0.205046s;"></div><div class="particle" style="width: 3.04624px; height: 3.04624px; left: 6.92636%; background: rgba(201, 162, 39, 0.53); animation-duration: 12.0819s; animation-delay: 8.30577s;"></div></div>
+
+    <!-- Login -->
+    <div class="login-page hidden" id="loginPage">
+        <div class="login-card">
+            <div class="university-logo">
+                <svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M50 5 L90 20 L90 55 C90 85 50 115 50 115 C50 115 10 85 10 55 L10 20 Z" fill="none" stroke="#c9a227" stroke-width="2"></path>
+                    <path d="M50 8 L86 22 L86 54 C86 82 50 110 50 110 C50 110 14 82 14 54 L14 22 Z" fill="rgba(26,58,110,0.3)" stroke="#c9a227" stroke-width="1"></path>
+                    <ellipse cx="50" cy="35" rx="12" ry="10" fill="#c9a227"></ellipse>
+                    <rect x="42" y="42" width="16" height="25" rx="3" fill="#c9a227"></rect>
+                    <rect x="38" y="45" width="6" height="18" rx="2" fill="#c9a227"></rect>
+                    <rect x="56" y="45" width="6" height="18" rx="2" fill="#c9a227"></rect>
+                    <rect x="44" y="67" width="12" height="20" rx="2" fill="#c9a227"></rect>
+                    <rect x="35" y="55" width="30" height="8" rx="2" fill="white" opacity="0.9"></rect>
+                    <line x1="38" y1="59" x2="62" y2="59" stroke="#1a3a6e" stroke-width="1"></line>
+                    <path d="M42 28 L50 18 L58 28" fill="none" stroke="#c9a227" stroke-width="2"></path>
+                    <text x="50" y="108" text-anchor="middle" fill="#c9a227" font-size="5" font-weight="700">جامعة القاهرة</text>
+                </svg>
+            </div>
+            <h1 class="login-title">تسجيل الدخول</h1>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="input-group">
+                    <input type="text" id="nationalId" placeholder="الرقم القومي" maxlength="14" required="">
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" placeholder="كلمة المرور" required="">
+                </div>
+                <button type="submit" class="login-btn">
+                    <span style="margin-left: 8px;">←</span> دخول النظام
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="dashboard-page active" id="dashboardPage">
+        <div class="dash-header">
+            <div style="width:178px;height:71px;overflow:hidden;">
+    <img src="https://i.postimg.cc/Y0sqgdYK/image-removebg-preview.png" style="width:178px;height:71px;object-fit:contain;display:block;">
+</div>
+            <button class="logout-btn" onclick="handleLogout()">
+                خروج <span style="margin-right: 6px;">→</span>
+            </button>
+        </div>
+
+        <div class="profile-hero">
+            <div class="profile-photo-container">
+                <div class="profile-photo-ring"></div>
+                <div class="profile-photo" id="profilePhoto"><img src="https://i.postimg.cc/G2tWYdQB/ac076206-f619-49a7-a97a-36585f06775c.jpg" alt="صورة" style="width:100%;height:100%;object-fit:cover;"></div>
+            </div>
+            <h2 class="profile-name" id="profileName">مانع حسن مقبل السلامه</h2>
+            <p class="profile-subtitle" id="profileSubtitle">إدارة الأعمال - كلية جدة العالمية</p>
+            <div class="status-badge">
+                <span style="font-size: 1.1rem;">✓</span> حساب خريج نشط
+            </div>
+        </div>
+
+        <div class="dash-content">
+            <!-- Personal Info -->
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-icon">👤</div>
+                    <h3 class="section-title">البيانات الشخصية</h3>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><span style="margin-left:6px;">📁</span>جواز السفر</span>
+                    <span class="info-value highlight" id="nationalIdDisplay">U444644</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><span style="margin-left:6px;">📅</span> تاريخ الميلاد</span>
+                    <span class="info-value" id="birthDate">1985/06/19</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><span style="margin-left:6px;">📍</span> محل الإقامة</span>
+                    <span class="info-value" id="address">سكاكا الجوف</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><span style="margin-left:6px;">🌏</span> الجنسية</span>
+                    <span class="info-value" id="nationality">سعودي</span>
+                </div>
+            </div>
+
+            <!-- Academic Info -->
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-icon">🎓</div>
+                    <h3 class="section-title">المسار الأكاديمي</h3>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><span style="margin-left:6px;">🏫</span> الجامعة</span>
+                    <span class="info-value" id="university">كلية جدة العالمية
+
+</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><span style="margin-left:6px;">🏢</span> الكلية</span>
+                    <span class="info-value" id="faculty">ماجستير إدارة الأعمال</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><span style="margin-left:6px;">📖</span>البرنامج </span>
+                    <span class="info-value" id="major">(MBA)</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><span style="margin-left:6px;">⏰</span>مدة الدراسة</span>
+                    <span class="info-value" id="major">36 ساعة</span>
+                </div>
+            </div>
+
+            <!-- Digital Verification -->
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-icon">🏆</div>
+                    <h3 class="section-title">التوثيق الرقمي</h3>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><span style="margin-left:6px;">⭐</span> التقدير العام</span>
+                    <span class="info-value success" id="grade">جيد جداً</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><span style="margin-left:6px;">✅</span> حالة الشهادة</span>
+                    <span class="info-value success">معتمدة وموثقة</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><span style="margin-left:6px;">💻</span>رقم القيد</span>
+                    <span class="info-value code" id="verifyCode">636020113</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><span style="margin-left:6px;">📈</span> النسبة المئوية</span>
+                    <span class="info-value success" id="percentage">85.75%</span>
+                </div>
+                
+                
+                <button type="button" class="view-btn" id="certificateLink" onclick="openCertificate()">
+    <span style="font-size:1.2rem;">📜</span>
+    عرض بيان النجاح (رابط مباشر)
+</button> 
+            </div>
+        </div>
+
+        <div class="dash-footer">
+            <p>© جميع الحقوق محفوظة كلية جدة العالمية الأهلية - مركز الخدمات الإلكترونية 2026</p>
+        </div>
+    </div>
+
+<script>
+function openCertificate() {
+    const newWindow = window.open("", "_blank");
+
+    newWindow.document.write(`
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بيان نجاح</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+font-family:'Segoe UI',Tahoma,sans-serif;
+background:#e8f0f8;
+min-height:100vh;
+}
+.certificate-page{
+background:#e8f0f8;
+min-height:100vh;
+padding:40px 20px;
+}
+.certificate-container{
+max-width:800px;
+margin:auto;
+background:#e8f0f8;
+padding:30px;
+}
+.cert-header{text-align:center;margin-bottom:10px;}
+.cert-header h1{font-size:2.2rem;font-weight:800;color:#1a3a6e;}
+.cert-header h2{font-size:1.2rem;color:#c9a227;margin-top:5px;}
+.cert-divider{
+height:2px;
+background:#1a3a6e;
+margin:20px 0 30px;
+}
+.cert-row{
+display:flex;
+justify-content:space-between;
+margin-bottom:25px;
+}
+.cert-col{
+flex:1;
+text-align:center;
+padding:0 10px;
+}
+.cert-col-label{
+font-size:.9rem;
+color:#666;
+margin-bottom:8px;
+}
+.cert-col-value{
+font-size:1.1rem;
+font-weight:bold;
+}
+.highlight{
+color:#4CAF50;
+}
+.cert-photo{
+width:120px;
+height:120px;
+border-radius:50%;
+object-fit:cover;
+display:block;
+margin:0 auto 20px;
+border:3px solid #1a3a6e;
+}
+.cert-footer-bar{
+background:#4CAF50;
+color:#fff;
+text-align:center;
+padding:25px;
+margin:40px -30px -30px;
+}
+.back-btn{
+position:fixed;
+top:20px;
+right:20px;
+padding:12px 20px;
+background:#1a3a6e;
+color:#fff;
+border:none;
+border-radius:8px;
+cursor:pointer;
+}
+.print-btn{
+position:fixed;
+top:20px;
+left:20px;
+padding:12px 20px;
+background:#4CAF50;
+color:#fff;
+border:none;
+border-radius:8px;
+cursor:pointer;
+}
+@media(max-width:600px){
+.cert-row{
+flex-direction:column;
+gap:15px;
+}
+}
+</style>
+
+</head>
+<body>
+
+<button class="back-btn" onclick="window.close()">✕ إغلاق</button>
+<button class="print-btn" onclick="window.print()">🖨 طباعة</button>
+
+<div class="certificate-page">
+<div class="certificate-container">
+
+<div class="cert-header">
+<h1>جامعة القاهرة</h1>
+<h2>بيان نجاح - شئون الخريجين</h2>
+</div>
+
+<div class="cert-divider"></div>
+
+<img src="https://i.postimg.cc/mDwyHm0L/483dfc7d-b832-4a99-bb2a-1ac42bd22061.jpg" class="cert-photo">
+
+<div class="cert-row">
+<div class="cert-col">
+<div class="cert-col-label">الاسم الكامل</div>
+<div class="cert-col-value">محمد ادريس ابوعريضه محمد
+</div>
+</div>
+
+<div class="cert-col">
+<div class="cert-col-label">جواز السفر
+</div>
+<div class="cert-col-value">AC280140
+</div>
+</div>
+</div>
+
+<div class="cert-row">
+<div class="cert-col">
+<div class="cert-col-label">تاريخ الميلاد</div>
+<div class="cert-col-value">1977/01/01
+</div>
+</div>
+
+<div class="cert-col">
+<div class="cert-col-label">الجنسية</div>
+<div class="cert-col-value">ليبي</div>
+</div>
+</div>
+
+<div class="cert-row">
+<div class="cert-col">
+<div class="cert-col-label">الكلية</div>
+<div class="cert-col-value">كلية التجارة</div>
+</div>
+
+<div class="cert-col">
+<div class="cert-col-label">التخصص</div>
+<div class="cert-col-value">دكتوراة إدارة أعمال
+</div>
+</div>
+</div>
+
+<div class="cert-row">
+<div class="cert-col">
+<div class="cert-col-label">سنة التخرج</div>
+<div class="cert-col-value">2026</div>
+</div>
+
+<div class="cert-col">
+<div class="cert-col-label">التقدير العام</div>
+<div class="cert-col-value highlight">جيد جداً (83%)</div>
+</div>
+</div>
+
+<div class="cert-row">
+<div class="cert-col" style="flex:2">
+<div class="cert-col-label">محل الإقامة</div>
+<div class="cert-col-value">تشاد - ليبيا
+</div>
+</div>
+</div>
+
+<div class="cert-row">
+<div class="cert-col" style="flex:2">
+<div class="cert-col-label">عميد الكلية</div>
+<div class="cert-col-value">أ.د لبني محمد فريد</div>
+</div>
+</div>
+
+<div class="cert-footer-bar">
+<h3>✓ الشهادة معتمدة وموثقة رقمياً</h3>
+<p>تم التحقق من صحة البيانات من خلال نظام التحقق الرقمي</p>	
+<p style="margin-top:5px;font-size:.8rem;">كود التحقق: LQ4977851</p>
+</div>
+
+</div>
+</div>
+
+
+
+    </body></html></script></body></html>
